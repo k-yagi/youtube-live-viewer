@@ -1,16 +1,11 @@
-import React, { Component } from "react"
+import React, { useEffect } from "react"
 import { graphql } from "gatsby"
 
 import Layout from "../components/layout"
+import VideoList from "../components/videoList"
 
-class IndexComponent extends Component {
-  constructor(props) {
-    super(props);
-    this.state = props.data;
-  }
-
-  componentDidMount() {
-    const self = this;
+export default ({ data }) => {
+  useEffect(() => {
     const tag = document.createElement('script');
 
     tag.src = "https://www.youtube.com/iframe_api";
@@ -22,7 +17,7 @@ class IndexComponent extends Component {
       player = new window.YT.Player('player', {
         height: '360',
         width: '640',
-        videoId: self.state.allContentsJson.edges[0].node.items[0].id.videoId,
+        videoId: data.allContentsJson.edges[0].node.items[0].id.videoId,
         events: {
           'onReady': onPlayerReady,
           'onStateChange': onPlayerStateChange
@@ -44,18 +39,19 @@ class IndexComponent extends Component {
     function stopVideo() {
       player.stopVideo();
     }
-  }
+  }, []);
 
-  render() {
-    return (
-      <Layout>
-        <div id="player"></div>
-      </Layout>
-    )
-  }
+  return (
+    <Layout>
+      <div id="player"></div>
+      <ul>
+        {data.allContentsJson.edges[0].node.items.map((item) => (
+          <VideoList item={item} />
+        ))}
+      </ul>
+    </Layout>
+  )
 }
-
-export default IndexComponent
 
 export const query = graphql`
   query {
@@ -68,7 +64,13 @@ export const query = graphql`
             }
             snippet {
               title
-              description
+              thumbnails {
+                medium {
+                  height
+                  width
+                  url
+                }
+              }
             }
           }
         }
