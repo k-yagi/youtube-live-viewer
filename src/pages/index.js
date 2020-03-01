@@ -6,9 +6,11 @@ import VideoList from "../components/videoList"
 import PlayingVideo from "../components/playingVideo"
 
 export default ({ data }) => {
-  const [playerState, setPlayerState] = useState(99);
-  const [playingVideoId, setPlayingVideoId] = useState(data.allContentsJson.edges[0].node.items[0].id.videoId);
-  const [player, setPlayer] = useState(undefined);
+  const videoList = data.allContentsJson.edges[0].node.items;
+  const [playerState, setPlayerState]             = useState(99);
+  const [playingVideoIndex, setPlayingVideoIndex] = useState(0);
+  const [playingVideo, setPlayingVideo]           = useState(videoList[playingVideoIndex]);
+  const [player, setPlayer]                       = useState(undefined);
 
   // プレイヤー初期化処理
   useEffect(() => {
@@ -20,19 +22,31 @@ export default ({ data }) => {
     window.onYouTubeIframeAPIReady = initPlayer;
   }, [])
 
+  // 再生中のvideo初期化
   useEffect(() => {
     if (player !== undefined) {
       player.destroy();
       initPlayer();
     }
-  }, [playingVideoId])
+  }, [playingVideo])
+
+  // videoのインデックスと再生中のvideoを一致させる
+  useEffect(() => {
+    setPlayingVideo(videoList[playingVideoIndex]);
+  }, [playingVideoIndex])
+
+  useEffect(() => {
+    if (window.YT && playerState === window.YT.PlayerState.ENDED) {
+      setPlayingVideoIndex(playingVideoIndex + 1);
+    }
+  }, [playerState])
 
   function initPlayer() {
     setPlayer(
       new window.YT.Player('player', {
         height: '360',
         width: '640',
-        videoId: playingVideoId,
+        videoId: playingVideo.id.videoId,
         events: {
           'onReady': (event) => { event.target.playVideo(); },
           'onStateChange': (event) => { setPlayerState(event.data); }
@@ -41,16 +55,17 @@ export default ({ data }) => {
     );
   }
 
-  function changePlayingVideo(videoId) {
-    setPlayingVideoId(videoId);
+  // 動画リストをクリックしたときの処理
+  function changePlayingVideo(index) {
+    setPlayingVideoIndex(index);
   }
 
   return (
     <Layout>
-      <PlayingVideo item={data.allContentsJson.edges[0].node.items[0]} />
+      <PlayingVideo item={playingVideo} />
       <ul>
-        {data.allContentsJson.edges[0].node.items.map((item) => (
-          <VideoList item={item} onClick={(data) => changePlayingVideo(data) } />
+        {videoList.map((item, index) => (
+          <VideoList item={item} index={index} onClick={(data) => changePlayingVideo(data) } />
         ))}
       </ul>
     </Layout>

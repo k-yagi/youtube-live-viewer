@@ -1,8 +1,8 @@
 import React from "react"
 
-export default ({ item, onClick }) => (
+export default ({ item, index, onClick }) => (
   <React.Fragment>
-    <li onClick={() => onClick(item.id.videoId)}>
+    <li onClick={() => onClick(index)}>
       <img src={item.snippet.thumbnails.medium.url} />
     </li>
     <li>{item.id.videoId}</li>
