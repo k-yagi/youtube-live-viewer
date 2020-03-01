@@ -1,52 +1,56 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { graphql } from "gatsby"
 
 import Layout from "../components/layout"
 import VideoList from "../components/videoList"
+import PlayingVideo from "../components/playingVideo"
 
 export default ({ data }) => {
+  const [playerState, setPlayerState] = useState(99);
+  const [playingVideoId, setPlayingVideoId] = useState(data.allContentsJson.edges[0].node.items[0].id.videoId);
+  const [player, setPlayer] = useState(undefined);
+
+  // プレイヤー初期化処理
   useEffect(() => {
     const tag = document.createElement('script');
-
     tag.src = "https://www.youtube.com/iframe_api";
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    let player = undefined;
-    window.onYouTubeIframeAPIReady = function () {
-      player = new window.YT.Player('player', {
+    window.onYouTubeIframeAPIReady = initPlayer;
+  }, [])
+
+  useEffect(() => {
+    if (player !== undefined) {
+      player.destroy();
+      initPlayer();
+    }
+  }, [playingVideoId])
+
+  function initPlayer() {
+    setPlayer(
+      new window.YT.Player('player', {
         height: '360',
         width: '640',
-        videoId: data.allContentsJson.edges[0].node.items[0].id.videoId,
+        videoId: playingVideoId,
         events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
+          'onReady': (event) => { event.target.playVideo(); },
+          'onStateChange': (event) => { setPlayerState(event.data); }
         }
-      });
-    }
+      })
+    );
+  }
 
-    function onPlayerReady(event) {
-      event.target.playVideo();
-    }
-
-    let done = false;
-    function onPlayerStateChange(event) {
-      if (event.data === window.YT.PlayerState.PLAYING && !done) {
-        setTimeout(stopVideo, 6000);
-        done = true;
-      }
-    }
-    function stopVideo() {
-      player.stopVideo();
-    }
-  }, []);
+  function changePlayingVideo(videoId) {
+    setPlayingVideoId(videoId);
+  }
 
   return (
     <Layout>
-      <div id="player"></div>
+      <PlayingVideo item={data.allContentsJson.edges[0].node.items[0]} />
       <ul>
         {data.allContentsJson.edges[0].node.items.map((item) => (
-          <VideoList item={item} />
+          <VideoList item={item} onClick={(data) => changePlayingVideo(data) } />
         ))}
       </ul>
     </Layout>
