@@ -1,35 +1,28 @@
-import { Link } from "gatsby"
+
 import PropTypes from "prop-types"
 import React from "react"
+import { AppBar, Toolbar, Typography, makeStyles } from "@material-ui/core"
 
-const Header = ({ siteTitle }) => (
-  <header
-    style={{
-      background: `rebeccapurple`,
-      marginBottom: `1.45rem`,
-    }}
-  >
-    <div
-      style={{
-        margin: `0 auto`,
-        maxWidth: 960,
-        padding: `1.45rem 1.0875rem`,
-      }}
-    >
-      <h1 style={{ margin: 0 }}>
-        <Link
-          to="/"
-          style={{
-            color: `white`,
-            textDecoration: `none`,
-          }}
-        >
+const useStyles = makeStyles(theme => ({
+  AppBar: {
+    marginBottom: theme.spacing(3),
+    background: theme.palette.background.paper
+  }
+}));
+
+const Header = ({ siteTitle }) => {
+  const classes = useStyles();
+
+  return (
+    <AppBar position="static" className={classes.AppBar}>
+      <Toolbar>
+        <Typography variant="h6">
           {siteTitle}
-        </Link>
-      </h1>
-    </div>
-  </header>
-)
+        </Typography>
+      </Toolbar>
+    </AppBar>
+  )
+}
 
 Header.propTypes = {
   siteTitle: PropTypes.string,
