@@ -6,7 +6,7 @@ import VideoList from "../components/videoList"
 import PlayingVideo from "../components/playingVideo"
 
 export default ({ data }) => {
-  const videoList = data.allContentsJson.edges[0].node.items;
+  const videoList = data.allContentsJson.edges;
   const [playerState, setPlayerState]             = useState(99);
   const [playingVideoIndex, setPlayingVideoIndex] = useState(0);
   const [playingVideo, setPlayingVideo]           = useState(videoList[playingVideoIndex]);
@@ -35,18 +35,22 @@ export default ({ data }) => {
     setPlayingVideo(videoList[playingVideoIndex]);
   }, [playingVideoIndex])
 
+  // 動画が終了したら次の動画へ
   useEffect(() => {
     if (window.YT && playerState === window.YT.PlayerState.ENDED) {
-      setPlayingVideoIndex(playingVideoIndex + 1);
+      if (videoList.length - 1 == playingVideoIndex) {
+      } else {
+        setPlayingVideoIndex(playingVideoIndex + 1);
+      }
     }
   }, [playerState])
 
   function initPlayer() {
     setPlayer(
-      new window.YT.Player('player', {
-        height: '360',
-        width: '640',
-        videoId: playingVideo.id.videoId,
+      window.hoge = new window.YT.Player('player', {
+        height: '720',
+        width: '100%',
+        videoId: playingVideo.node.videoId,
         events: {
           'onReady': (event) => { event.target.playVideo(); },
           'onStateChange': (event) => { setPlayerState(event.data); }
@@ -63,32 +67,24 @@ export default ({ data }) => {
   return (
     <Layout>
       <PlayingVideo item={playingVideo} />
-      <ul>
-        {videoList.map((item, index) => (
-          <VideoList item={item} index={index} onClick={(data) => changePlayingVideo(data) } />
-        ))}
-      </ul>
+      <VideoList videoList={videoList} onClick={(data) => changePlayingVideo(data)} />
     </Layout>
   )
 }
 
 export const query = graphql`
   query {
-    allContentsJson {
+    allContentsJson(filter: {snippet: {liveBroadcastContent: {in: ["upcoming", "live"]}}}) {
       edges {
         node {
-          items {
-            id {
-              videoId
-            }
-            snippet {
-              title
-              thumbnails {
-                medium {
-                  height
-                  width
-                  url
-                }
+          videoId
+          snippet {
+            title
+            thumbnails {
+              medium {
+                height
+                width
+                url
               }
             }
           }
