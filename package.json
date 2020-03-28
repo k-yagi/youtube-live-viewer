@@ -34,10 +34,11 @@
     "build": "gatsby build",
     "develop": "gatsby develop",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
-    "start": "npm run develop",
+    "start": "(trap 'kill 0' 2 && npm run serve & npm run refresh_contents & wait)",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
+    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1",
+    "refresh_contents": "node ./lib/search_youtube.js --now"
   },
   "repository": {
     "type": "git",
