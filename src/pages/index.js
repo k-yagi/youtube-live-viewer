@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import { graphql } from "gatsby"
 
 import Layout from "../components/layout"
@@ -11,6 +11,19 @@ export default ({ data }) => {
   const [playingVideoIndex, setPlayingVideoIndex] = useState(0);
   const [playingVideo, setPlayingVideo]           = useState(videoList[playingVideoIndex]);
   const [player, setPlayer]                       = useState(undefined);
+  const initPlayer                                = useCallback(() => {
+    setPlayer(
+      window.ytPlayer = new window.YT.Player('player', {
+        height: '720',
+        width: '100%',
+        videoId: playingVideo.node.videoId,
+        events: {
+          'onReady': (event) => { event.target.playVideo(); },
+          'onStateChange': (event) => { setPlayerState(event.data); }
+        }
+      })
+    );
+  }, [playingVideo.node.videoId]);
 
   // プレイヤー初期化処理
   useEffect(() => {
@@ -38,36 +51,19 @@ export default ({ data }) => {
   // 動画が終了したら次の動画へ
   useEffect(() => {
     if (window.YT && playerState === window.YT.PlayerState.ENDED) {
-      if (videoList.length - 1 == playingVideoIndex) {
+      if (videoList.length - 1 === playingVideoIndex) {
       } else {
         setPlayingVideoIndex(playingVideoIndex + 1);
       }
     }
-  }, [playerState])
+  }, [playerState, videoList])
 
-  function initPlayer() {
-    setPlayer(
-      window.hoge = new window.YT.Player('player', {
-        height: '720',
-        width: '100%',
-        videoId: playingVideo.node.videoId,
-        events: {
-          'onReady': (event) => { event.target.playVideo(); },
-          'onStateChange': (event) => { setPlayerState(event.data); }
-        }
-      })
-    );
-  }
-
-  // 動画リストをクリックしたときの処理
-  function changePlayingVideo(index) {
-    setPlayingVideoIndex(index);
-  }
+  const onClickVideoList = useCallback((index) => setPlayingVideoIndex(index), [])
 
   return (
     <Layout>
       <PlayingVideo item={playingVideo} />
-      <VideoList videoList={videoList} onClick={(data) => changePlayingVideo(data)} />
+      <VideoList videoList={videoList} onClick={(data) => onClickVideoList(data)} />
     </Layout>
   )
 }
