@@ -1,29 +1,35 @@
-import React, { useEffect, useState, useCallback } from "react"
+import React, { useEffect, useCallback, useReducer } from "react"
 import { graphql } from "gatsby"
 
 import Layout from "../components/layout"
 import VideoList from "../components/videoList"
 import PlayingVideo from "../components/playingVideo"
 
-export default ({ data }) => {
-  const videoList = data.allContentsJson.edges;
-  const [playerState, setPlayerState]             = useState(99);
-  const [playingVideoIndex, setPlayingVideoIndex] = useState(0);
-  const [playingVideo, setPlayingVideo]           = useState(videoList[playingVideoIndex]);
-  const [player, setPlayer]                       = useState(undefined);
-  const initPlayer                                = useCallback(() => {
-    setPlayer(
-      window.ytPlayer = new window.YT.Player('player', {
-        height: '720',
-        width: '100%',
-        videoId: playingVideo.node.videoId,
-        events: {
-          'onReady': (event) => { event.target.playVideo(); },
-          'onStateChange': (event) => { setPlayerState(event.data); }
-        }
+function reducer(state, action) {
+  switch(action.type) {
+    // action.playingVideoIndex で指定したインデックスの動画を再生
+    case 'playVideo':
+      return Object.assign({}, state, {
+        playingVideoIndex: action.playingVideoIndex,
+        playingVideo: state.videoList[action.playingVideoIndex]
       })
-    );
-  }, [playingVideo.node.videoId]);
+    case 'playNextVideo':
+      const index = state.playingVideoIndex + 1
+      return Object.assign({}, state, {
+        playingVideoIndex: index,
+        playingVideo: state.videoList[index]
+      })
+    default:
+      throw new Error()
+  }
+}
+
+export default ({ data }) => {
+  const [state, dispatch] = useReducer(reducer, {
+    playingVideoIndex: 0,
+    videoList: data.allContentsJson.edges,
+    playingVideo: null
+  });
 
   // プレイヤー初期化処理
   useEffect(() => {
@@ -32,38 +38,44 @@ export default ({ data }) => {
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    window.onYouTubeIframeAPIReady = initPlayer;
+    window.onYouTubeIframeAPIReady = () => {
+      dispatch({ type: 'playVideo', playingVideoIndex: 0 })
+    };
   }, [])
 
-  // 再生中のvideo初期化
+  // プレイヤーの動画更新
   useEffect(() => {
-    if (player !== undefined) {
-      player.destroy();
-      initPlayer();
-    }
-  }, [playingVideo])
-
-  // videoのインデックスと再生中のvideoを一致させる
-  useEffect(() => {
-    setPlayingVideo(videoList[playingVideoIndex]);
-  }, [playingVideoIndex])
-
-  // 動画が終了したら次の動画へ
-  useEffect(() => {
-    if (window.YT && playerState === window.YT.PlayerState.ENDED) {
-      if (videoList.length - 1 === playingVideoIndex) {
-      } else {
-        setPlayingVideoIndex(playingVideoIndex + 1);
+    if (window.YT) {
+      window.ytPlayer = new window.YT.Player('player', {
+        height: '720',
+        width: '100%',
+        videoId: state.playingVideo.node.videoId,
+        events: {
+          'onReady': (event) => { event.target.playVideo(); },
+          'onStateChange': (event) => {
+            if (window.YT && event.data === window.YT.PlayerState.ENDED) {
+              if (state.videoList.length - 1 === state.playingVideoIndex) {
+              } else {
+                dispatch({ type: 'playNextVideo' });
+              }
+            }
+          }
+        }
+      });
+      return () => {
+        window.ytPlayer.destroy()
       }
     }
-  }, [playerState, videoList])
+  }, [state.videoList.length, state.playingVideo, state.playingVideoIndex])
 
-  const onClickVideoList = useCallback((index) => setPlayingVideoIndex(index), [])
+  const onClickVideoList = useCallback((index) => {
+    dispatch({ type: 'playVideo', playingVideoIndex: index })
+  }, [])
 
   return (
     <Layout>
-      <PlayingVideo item={playingVideo} />
-      <VideoList videoList={videoList} onClick={(data) => onClickVideoList(data)} />
+      <PlayingVideo item={state.playingVideo} />
+      <VideoList videoList={state.videoList} onClick={(data) => onClickVideoList(data)} />
     </Layout>
   )
 }
