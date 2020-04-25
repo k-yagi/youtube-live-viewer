@@ -1,5 +1,10 @@
-import React from "react"
-import { GridListTileBar, GridList, GridListTile, makeStyles } from "@material-ui/core"
+import React from 'react';
+import {
+  GridListTileBar,
+  GridList,
+  GridListTile,
+  makeStyles,
+} from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -7,7 +12,7 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'wrap',
     justifyContent: 'space-around',
     overflow: 'hidden',
-    marginBottom: theme.spacing(3)
+    marginBottom: theme.spacing(3),
   },
   gridList: {
     width: '100%',
@@ -17,7 +22,7 @@ const useStyles = makeStyles(theme => ({
     transform: 'translateZ(0)',
   },
   gridListTile: {
-    marginRight: theme.spacing(2)
+    marginRight: theme.spacing(2),
   },
   title: {
     color: theme.palette.text.secondary,
@@ -35,12 +40,22 @@ export default ({ videoList, onClick }) => {
     <div className={classes.root}>
       <GridList className={classes.gridList} cols={3.8}>
         {videoList.map((item, index) => (
-          <GridListTile key={item.node.videoId} className={classes.gridListTile} onClick={() => onClick(index)}>
-            <img src={item.node.snippet.thumbnails.medium.url} alt={item.node.snippet.title}/>
-            <GridListTileBar title={item.node.snippet.title} classes={{ root: classes.titleBar, title: classes.title }} />
+          <GridListTile
+            key={item.node.videoId}
+            className={classes.gridListTile}
+            onClick={() => onClick(index)}
+          >
+            <img
+              src={item.node.snippet.thumbnails.medium.url}
+              alt={item.node.snippet.title}
+            />
+            <GridListTileBar
+              title={item.node.snippet.title}
+              classes={{ root: classes.titleBar, title: classes.title }}
+            />
           </GridListTile>
         ))}
       </GridList>
     </div>
-  )
-}
+  );
+};
