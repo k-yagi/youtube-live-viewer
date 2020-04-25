@@ -34,12 +34,9 @@ export default ({ videoList, onClick }) => {
   return (
     <div className={classes.root}>
       <GridList className={classes.gridList} cols={3.8}>
-        {/* <GridListTile key="Subheader" style={{ height: 'auto', margin: 0 }}>
-          <ListSubheader component="div">他の動画</ListSubheader>
-        </GridListTile> */}
         {videoList.map((item, index) => (
           <GridListTile key={item.node.videoId} className={classes.gridListTile} onClick={() => onClick(index)}>
-            <img src={item.node.snippet.thumbnails.medium.url}/>
+            <img src={item.node.snippet.thumbnails.medium.url} alt={item.node.snippet.title}/>
             <GridListTileBar title={item.node.snippet.title} classes={{ root: classes.titleBar, title: classes.title }} />
           </GridListTile>
         ))}
