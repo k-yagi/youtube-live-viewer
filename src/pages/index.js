@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback, useReducer } from 'react';
 import { graphql } from 'gatsby';
+import { schedule } from 'node-cron';
 
 import Layout from '../components/layout';
 import VideoList from '../components/videoList';
@@ -19,6 +20,8 @@ function reducer(state, action) {
         playingVideoIndex: index,
         playingVideo: state.videoList[index],
       });
+    case 'updateContents':
+      return Object.assign({}, state, { contentsUpdated: true })
     default:
       throw new Error();
   }
@@ -29,6 +32,7 @@ export default ({ data }) => {
     playingVideoIndex: 0,
     videoList: data.allContentsJson.edges,
     playingVideo: null,
+    contentsUpdated: false,
   });
 
   // プレイヤー初期化処理
@@ -42,6 +46,14 @@ export default ({ data }) => {
       dispatch({ type: 'playVideo', playingVideoIndex: 0 });
     };
   }, []);
+
+  // コンテンツ更新フラグ更新。毎時0分に更新される前提
+  // 備考: search_youtube.js
+  useEffect(() => {
+    schedule('0 * * * *', () => {
+      dispatch({ type: 'updateContents' });
+    });
+  }, [state.contentsUpdated]);
 
   // プレイヤーの動画更新
   useEffect(() => {
