@@ -53,6 +53,12 @@ export default ({ data }) => {
     schedule('0 * * * *', () => {
       dispatch({ type: 'updateContents' });
     });
+
+    schedule('2 * * * *', () => {
+      if (state.contentsUpdated && (window.ytPlayer.getPlayerState() !== window.YT.PlayerState.PLAYING) ) {
+        window.location.reload();
+      }
+    });
   }, [state.contentsUpdated]);
 
   // プレイヤーの動画更新
@@ -68,7 +74,9 @@ export default ({ data }) => {
           },
           onStateChange: event => {
             if (window.YT && event.data === window.YT.PlayerState.ENDED) {
-              if (state.videoList.length - 1 === state.playingVideoIndex) {
+              if (state.contentsUpdated) {
+                window.location.reload();
+              } else if (state.videoList.length - 1 === state.playingVideoIndex) {
               } else {
                 dispatch({ type: 'playNextVideo' });
               }
