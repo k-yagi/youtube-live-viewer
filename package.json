@@ -1,9 +1,7 @@
 {
-  "name": "gatsby-starter-default",
-  "private": true,
-  "description": "A simple starter to get up and developing quickly with Gatsby",
+  "name": "youtube-live-viewer",
+  "description": "You won't miss YouTube live stream.",
   "version": "0.1.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
   "dependencies": {
     "@material-ui/core": "^4.9.5",
     "gatsby": "^2.19.7",
@@ -26,9 +24,6 @@
   "devDependencies": {
     "prettier": "^1.19.1"
   },
-  "keywords": [
-    "gatsby"
-  ],
   "license": "MIT",
   "scripts": {
     "build": "gatsby build",
@@ -37,14 +32,6 @@
     "start": "(trap 'kill 0' 2 && npm run serve & npm run refresh_contents & wait)",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1",
-    "refresh_contents": "node ./lib/search_youtube.js --now"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gatsbyjs/gatsby-starter-default"
-  },
-  "bugs": {
-    "url": "https://github.com/gatsbyjs/gatsby/issues"
+    "refresh_contents": "node ./lib/search_youtube.js --now",
   }
 }
