@@ -19,7 +19,9 @@
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-helmet": "^5.2.1"
+    "react-helmet": "^5.2.1",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.5"
   },
   "devDependencies": {
     "prettier": "^1.19.1"
@@ -32,6 +34,6 @@
     "start": "(trap 'kill 0' 2 && npm run serve & npm run refresh_contents & wait)",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
-    "refresh_contents": "node ./lib/search_youtube.js --now",
+    "refresh_contents": "node ./lib/search_youtube.js --now"
   }
 }
