@@ -17,6 +17,7 @@ Add the following environment variables in `.env`.
   - [Learn more about API key generation](https://developers.google.com/youtube/registering_an_application?hl=ja#create_project).
 - `CHANNEL_IDS`: ID of YouTube Channel you want to get the data. If you want to specify more than one, please separate them by a comma.
   - Example: `CHANNEL_IDS='xxxx,yyyy,zzzz'`
+  - Note: Due to the limitations of the YouTube Data API, I recommend that you keep channel IDs to 4 or less.
 
 # Start up
 
