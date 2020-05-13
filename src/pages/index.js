@@ -1,10 +1,12 @@
 import React, { useEffect, useCallback, useReducer } from 'react';
 import { graphql } from 'gatsby';
+import { connect } from 'react-redux';
 import { schedule } from 'node-cron';
 
 import Layout from '../components/layout';
 import VideoList from '../components/videoList';
 import PlayingVideo from '../components/playingVideo';
+import { contentsUpdated } from '../modules/content';
 
 function reducer(state, action) {
   switch (action.type) {
@@ -20,19 +22,17 @@ function reducer(state, action) {
         playingVideoIndex: index,
         playingVideo: state.videoList[index],
       });
-    case 'updateContents':
-      return Object.assign({}, state, { contentsUpdated: true })
     default:
       throw new Error();
   }
 }
 
-export default ({ data }) => {
+
+const Index = ({ data, contentsUpdated, isContentsUpdated }) => {
   const [state, dispatch] = useReducer(reducer, {
     playingVideoIndex: 0,
     videoList: data.allContentsJson.edges,
     playingVideo: null,
-    contentsUpdated: false,
   });
 
   // プレイヤー初期化処理
@@ -50,16 +50,16 @@ export default ({ data }) => {
   // コンテンツ更新フラグ更新。毎時0分に更新される前提
   // 備考: search_youtube.js
   useEffect(() => {
-    schedule('0 * * * *', () => {
-      dispatch({ type: 'updateContents' });
+    schedule('56 * * * *', () => {
+      contentsUpdated();
     });
 
     schedule('2 * * * *', () => {
-      if (state.contentsUpdated && (window.ytPlayer.getPlayerState() !== window.YT.PlayerState.PLAYING) ) {
+      if (isContentsUpdated && (window.ytPlayer.getPlayerState() !== window.YT.PlayerState.PLAYING) ) {
         window.location.reload();
       }
     });
-  }, [state.contentsUpdated]);
+  }, [contentsUpdated, isContentsUpdated]);
 
   // プレイヤーの動画更新
   useEffect(() => {
@@ -74,7 +74,7 @@ export default ({ data }) => {
           },
           onStateChange: event => {
             if (window.YT && event.data === window.YT.PlayerState.ENDED) {
-              if (state.contentsUpdated) {
+              if (isContentsUpdated) {
                 window.location.reload();
               } else if (state.videoList.length - 1 === state.playingVideoIndex) {
               } else {
@@ -88,7 +88,7 @@ export default ({ data }) => {
         window.ytPlayer.destroy();
       };
     }
-  }, [state.videoList.length, state.playingVideo, state.playingVideoIndex]);
+  }, [state.videoList.length, state.playingVideo, state.playingVideoIndex, isContentsUpdated]);
 
   const onClickVideoList = useCallback(index => {
     dispatch({ type: 'playVideo', playingVideoIndex: index });
@@ -104,6 +104,15 @@ export default ({ data }) => {
     </Layout>
   );
 };
+
+const mapStateToProps = state => {
+  return { isContentsUpdated: state.isContentsUpdated }
+}
+
+export default connect(
+  mapStateToProps,
+  { contentsUpdated }
+)(Index);
 
 export const query = graphql`
   query {
