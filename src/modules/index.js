@@ -1,5 +1,5 @@
 // 各moduleはexport defaultでreducerを渡すようにして、ここでcombineReducerでまとめる感じか？
 import { combineReducers } from 'redux';
-import content from "./content";
+import contents from "./contents";
 
-export default combineReducers({ content });
+export default combineReducers({ contents });

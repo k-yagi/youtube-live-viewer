@@ -6,7 +6,7 @@ import { schedule } from 'node-cron';
 import Layout from '../components/layout';
 import VideoList from '../components/videoList';
 import PlayingVideo from '../components/playingVideo';
-import { contentsUpdated } from '../modules/content';
+import { contentsUpdated } from '../modules/contents';
 
 function reducer(state, action) {
   switch (action.type) {
