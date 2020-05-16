@@ -5,7 +5,7 @@ import { schedule } from 'node-cron';
 
 import Layout from '../components/layout';
 import VideoListContainer from '../containers/videoListContainer';
-import PlayingVideo from '../components/playingVideo';
+import PlayingVideoContainer from '../containers/playingVideoContainer';
 import { contentsUpdated } from '../modules/contents';
 
 function reducer(state, action) {
@@ -91,7 +91,7 @@ const Index = ({ data, contentsUpdated, isContentsUpdated }) => {
 
   return (
     <Layout>
-      <PlayingVideo item={state.playingVideo} />
+      <PlayingVideoContainer />
       <VideoListContainer />
     </Layout>
   );
