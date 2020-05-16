@@ -16,12 +16,6 @@ function reducer(state, action) {
         playingVideoIndex: action.playingVideoIndex,
         playingVideo: state.videoList[action.playingVideoIndex],
       });
-    case 'playNextVideo':
-      const index = state.playingVideoIndex + 1;
-      return Object.assign({}, state, {
-        playingVideoIndex: index,
-        playingVideo: state.videoList[index],
-      });
     default:
       throw new Error();
   }
@@ -59,35 +53,6 @@ const Index = ({ data, contentsUpdated, isContentsUpdated }) => {
       }
     });
   }, [contentsUpdated, isContentsUpdated]);
-
-  // プレイヤーの動画更新
-  useEffect(() => {
-    if (window.YT) {
-      window.ytPlayer = new window.YT.Player('player', {
-        height: '720',
-        width: '100%',
-        videoId: state.playingVideo.node.videoId,
-        events: {
-          onReady: event => {
-            event.target.playVideo();
-          },
-          onStateChange: event => {
-            if (window.YT && event.data === window.YT.PlayerState.ENDED) {
-              if (isContentsUpdated) {
-                window.location.reload();
-              } else if (state.videoList.length - 1 === state.playingVideoIndex) {
-              } else {
-                dispatch({ type: 'playNextVideo' });
-              }
-            }
-          },
-        },
-      });
-      return () => {
-        window.ytPlayer.destroy();
-      };
-    }
-  }, [state.videoList.length, state.playingVideo, state.playingVideoIndex, isContentsUpdated]);
 
   return (
     <Layout>
