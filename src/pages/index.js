@@ -1,10 +1,10 @@
-import React, { useEffect, useCallback, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { graphql } from 'gatsby';
 import { connect } from 'react-redux';
 import { schedule } from 'node-cron';
 
 import Layout from '../components/layout';
-import VideoList from '../components/videoList';
+import VideoListContainer from '../containers/videoListContainer';
 import PlayingVideo from '../components/playingVideo';
 import { contentsUpdated } from '../modules/contents';
 
@@ -26,7 +26,6 @@ function reducer(state, action) {
       throw new Error();
   }
 }
-
 
 const Index = ({ data, contentsUpdated, isContentsUpdated }) => {
   const [state, dispatch] = useReducer(reducer, {
@@ -50,7 +49,7 @@ const Index = ({ data, contentsUpdated, isContentsUpdated }) => {
   // コンテンツ更新フラグ更新。毎時0分に更新される前提
   // 備考: search_youtube.js
   useEffect(() => {
-    schedule('56 * * * *', () => {
+    schedule('0 * * * *', () => {
       contentsUpdated();
     });
 
@@ -90,23 +89,16 @@ const Index = ({ data, contentsUpdated, isContentsUpdated }) => {
     }
   }, [state.videoList.length, state.playingVideo, state.playingVideoIndex, isContentsUpdated]);
 
-  const onClickVideoList = useCallback(index => {
-    dispatch({ type: 'playVideo', playingVideoIndex: index });
-  }, []);
-
   return (
     <Layout>
       <PlayingVideo item={state.playingVideo} />
-      <VideoList
-        videoList={state.videoList}
-        onClick={data => onClickVideoList(data)}
-      />
+      <VideoListContainer />
     </Layout>
   );
 };
 
 const mapStateToProps = state => {
-  return { isContentsUpdated: state.isContentsUpdated }
+  return { isContentsUpdated: state.contents.isContentsUpdated }
 }
 
 export default connect(
