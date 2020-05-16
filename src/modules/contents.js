@@ -13,12 +13,14 @@ const initialState = {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case CONTENTS_UPDATED:
+    case CONTENTS_UPDATED: {
       return {
         ...state,
         isContentsUpdated: true
       }
-    default:
+    }
+    default: {
       return state;
+    }
   }
 }
