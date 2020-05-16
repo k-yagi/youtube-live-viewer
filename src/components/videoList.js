@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useStaticQuery, graphql } from 'gatsby';
 import {
   GridListTileBar,
   GridList,
@@ -33,8 +34,37 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default ({ videoList, onClick }) => {
+export default ({ videoList, setVideoList, playSelectedVideo }) => {
   const classes = useStyles();
+  const data = useStaticQuery(graphql`
+    query {
+      allContentsJson(
+        filter: {
+          snippet: { liveBroadcastContent: { in: ["upcoming", "live"] } }
+        }
+      ) {
+        edges {
+          node {
+            videoId
+            snippet {
+              title
+              thumbnails {
+                medium {
+                  height
+                  width
+                  url
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `)
+
+  useEffect(() => {
+    setVideoList(data.allContentsJson.edges);
+  }, [setVideoList, data])
 
   return (
     <div className={classes.root}>
@@ -43,7 +73,7 @@ export default ({ videoList, onClick }) => {
           <GridListTile
             key={item.node.videoId}
             className={classes.gridListTile}
-            onClick={() => onClick(index)}
+            onClick={() => playSelectedVideo(index)}
           >
             <img
               src={item.node.snippet.thumbnails.medium.url}
